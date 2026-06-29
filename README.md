@@ -1,63 +1,114 @@
-<p align="center"><a href="https://symfony.com" target="_blank">
-    <img src="https://symfony.com/logos/symfony_black_02.svg">
-</a></p>
+# Projet Symfony - Gestion des soutenances
 
-The [Symfony binary][1] is a must-have tool when developing Symfony applications
-on your local machine. It provides:
+Ce dépôt contient l'application Symfony de gestion des soutenances de fin d'études.
 
-* The best way to [create new Symfony applications][2];
-* A powerful [local web server][3] to develop your projects with support for [TLS certificates][4];
-* A tool to [check for security vulnerabilities][5];
-* Seamless integration with [Platform.sh][6].
+## Prérequis
 
-Installation
-------------
+Avant de lancer le projet, assurez-vous d'avoir installé :
 
-Read the installation instructions on [symfony.com][7].
+- PHP 8.1 ou supérieur
+- Composer
+- Symfony CLI (recommandé)
+- Docker et Docker Compose (si vous souhaitez utiliser la base de données via conteneur)
+- Git
 
-Signature Verification
-----------------------
+## Installation
 
-Symfony binaries are signed using [cosign][8], which is part of [sigstore][9].
-Signatures can be verified as follows (OS and architecture omitted for clarity):
+1. Se placer dans le dossier du projet :
 
-```console
-$ COSIGN_EXPERIMENTAL=1 cosign verify-blob --signature symfony-cli.sig symfony-cli
-tlog entry verified with uuid: "2b7ca2bfb7ee09114a15d60761c2a0a8c97f07cc20c02e635a92ba137a08a6de" index: 1261963
-Verified OK
+```bash
+cd mon_projet_symfony
 ```
 
-The above uses the (currently experimental) [keyless signing][10] method.
-Alternatively, one can verify the signature by also providing the certificate:
+2. Installer les dépendances PHP :
 
-```console
-$ cosign verify-blob --cert symfony-cli.pem --signature symfony-cli.sig symfony-cli
-Verified OK
+```bash
+composer install
 ```
 
-Security Issues
----------------
+3. Configurer l'environnement :
 
-If you discover a security vulnerability, please follow our [disclosure procedure][11].
+Copiez le fichier d'environnement puis modifiez la variable de connexion à la base de données :
 
-Sponsorship [<img src="https://assets.cloudsmith.media/images/cloudsmith-logo-light.svg" width="250" align="right" />](https://cloudsmith.io/)
------------
+```bash
+copy .env .env.local
+```
 
-Package repository hosting is graciously provided by
-[cloudsmith](https://cloudsmith.io/). Cloudsmith is the only fully hosted,
-cloud-native, universal package management solution, that enables your
-organization to create, store and share packages in any format, to any place,
-with total confidence. We believe there’s a better way to manage software
-assets and packages, and they're making it happen!
+Exemple de configuration avec PostgreSQL :
 
-[1]: https://symfony.com/download
-[2]: https://symfony.com/doc/current/setup.html#creating-symfony-applications
-[3]: https://symfony.com/doc/current/setup/symfony_server.html
-[4]: https://symfony.com/doc/current/setup/symfony_server.html#enabling-tls
-[5]: https://symfony.com/doc/current/setup.html#security-checker
-[6]: https://symfony.com/cloud
-[7]: https://symfony.com/download
-[8]: https://github.com/SigStore/cosign
-[9]: https://www.sigstore.dev/
-[10]: https://github.com/sigstore/cosign/blob/main/KEYLESS.md
-[11]: https://symfony.com/security
+```env
+DATABASE_URL="postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
+```
+
+4. Démarrer la base de données (si vous utilisez Docker) :
+
+```bash
+docker compose up -d database
+```
+
+5. Créer la base de données :
+
+```bash
+php bin/console doctrine:database:create
+```
+
+6. Appliquer les migrations :
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
+7. (Optionnel) Créer des données de test :
+
+```bash
+php bin/console app:create-test-users
+```
+
+## Commandes de lancement
+
+### Avec Symfony CLI
+
+```bash
+symfony server:start --no-tls
+```
+
+Puis ouvrez l'adresse suivante dans votre navigateur :
+
+```text
+http://127.0.0.1:8000
+```
+
+### Sans Symfony CLI
+
+```bash
+php -S 127.0.0.1:8000 -t public
+```
+
+## Comptes de test
+
+Si vous avez exécuté la commande ci-dessus, vous pouvez vous connecter avec :
+
+- Administrateur : admin@ipnet.com / admin123
+- Enseignant : teacher1@ipnet.com / teacher123
+
+## Commandes utiles
+
+- Vider le cache :
+
+```bash
+php bin/console cache:clear
+```
+
+- Exécuter les tests :
+
+```bash
+php bin/phpunit
+```
+
+## Structure du projet
+
+- src/ : logique applicative et entités
+- templates/ : vues Twig
+- config/ : configuration Symfony
+- migrations/ : migrations Doctrine
+- public/ : point d'entrée web
